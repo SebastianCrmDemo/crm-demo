@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kontakt — Engineware Demo Sp. z o.o.</title>
+<meta name="description" content="Dane kontaktowe Engineware Demo Sp. z o.o. — siedziba w Warszawie.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <span class="brand-chip"><span></span></span>
+      <span class="brand-name">Engineware Demo<small>Networking &amp; Accessories</small></span>
+    </a>
+    <nav class="site-nav">
+      <a href="index.html">Strona główna</a>
+      <a href="o-nas.html">O nas</a>
+      <a href="kontakt.html" aria-current="page">Kontakt</a>
+    </nav>
+  </div>
+</header>
+
+<div class="faceplate" aria-hidden="true">
+  <div class="wrap">
+    <div class="port"><span class="led"></span> WAN</div>
+    <div class="port"><span class="led"></span> LAN 1–8</div>
+    <div class="port"><span class="led"></span> USB-C</div>
+    <div class="port"><span class="led"></span> PoE+</div>
+    <div class="port"><span class="led"></span> LINK/ACT</div>
+    <div class="port"><span class="led"></span> PWR</div>
+  </div>
+</div>
+
+<main>
+
+  <section class="hero pcb">
+    <div class="wrap">
+      <div class="eyebrow">Kontakt</div>
+      <h1>Napisz, zanim kabel <span class="accent">znowu się zaplącze</span>.</h1>
+      <p class="lede">Dział handlowy odpowiada zwykle tego samego dnia roboczego. Wsparcie techniczne działa 8–18 — poza tymi godzinami zostawiamy diodę LED zapaloną, ale nikt nie odbiera.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Firma w liczbach</h2>
+        <span class="tag">rejestr spółki</span>
+      </div>
+      <dl class="company-facts">
+        <div class="fact">
+          <dt>Nazwa firmy</dt>
+          <dd data-field="nazwa-firmy">Engineware Demo Sp. z o.o.</dd>
+        </div>
+        <div class="fact">
+          <dt>Branża</dt>
+          <dd data-field="branza">Sprzęt sieciowy i akcesoria</dd>
+        </div>
+        <div class="fact">
+          <dt>Liczba pracowników</dt>
+          <dd data-field="liczba-pracownikow">86</dd>
+        </div>
+        <div class="fact">
+          <dt>Przychód / obrót</dt>
+          <dd data-field="przychod">14 200 000 PLN (2025)</dd>
+        </div>
+        <div class="fact">
+          <dt>Lokalizacja siedziby</dt>
+          <dd data-field="lokalizacja-siedziby">Warszawa, Polska</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="alt">
+    <div class="wrap contact-grid">
+
+      <div>
+        <div class="section-head" style="margin-bottom:24px;">
+          <h2>Formularz zgłoszeniowy</h2>
+          <span class="tag">wiadomość</span>
+        </div>
+
+        <form onsubmit="return false;">
+          <div class="field">
+            <label for="name">Imię i nazwisko</label>
+            <input type="text" id="name" name="name" placeholder="Jan Kowalski">
+          </div>
+          <div class="field">
+            <label for="company">Firma</label>
+            <input type="text" id="company" name="company" placeholder="Nazwa Twojej organizacji">
+          </div>
+          <div class="field">
+            <label for="email">Adres e-mail</label>
+            <input type="email" id="email" name="email" placeholder="jan.kowalski@firma.pl">
+          </div>
+          <div class="field">
+            <label for="message">Wiadomość</label>
+            <textarea id="message" name="message" placeholder="Opisz czego potrzebujesz — routery, switche, akcesoria…"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Wyślij zapytanie</button>
+          <p class="demo-note">Formularz demonstracyjny — nie wysyła żadnych danych.</p>
+        </form>
+      </div>
+
+      <div>
+        <div class="section-head" style="margin-bottom:24px;">
+          <h2>Dane bezpośrednie</h2>
+          <span class="tag">biuro główne</span>
+        </div>
+
+        <div class="contact-block">
+          <h3>Siedziba</h3>
+          <p>Engineware Demo Sp. z o.o.</p>
+          <p>ul. Demo 123</p>
+          <p>00-001 Warszawa, Polska</p>
+        </div>
+
+        <div class="contact-block">
+          <h3>Telefon</h3>
+          <p><a href="tel:+48600123456">+48 600 123 456</a></p>
+        </div>
+
+        <div class="contact-block">
+          <h3>Osoba kontaktowa</h3>
+          <p>Paweł Testowy</p>
+          <p>Account Executive — Networking &amp; Accessories</p>
+          <p><a href="mailto:pawel.testowy@engineware.pl">pawel.testowy@engineware.pl</a></p>
+        </div>
+
+        <div class="contact-block">
+          <h3>Strona internetowa</h3>
+          <p><a href="https://demo.engineware.pl">https://demo.engineware.pl</a></p>
+        </div>
+
+        <div class="map-block" role="img" aria-label="Poglądowa mapa lokalizacji siedziby w Warszawie">
+          <span class="map-pin"></span>
+          <span class="map-caption">Warszawa · ul. Demo 123</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-top">
+      <div>
+        <div class="foot-brand">Engineware Demo Sp. z o.o.</div>
+        <p class="legal">
+          ul. Demo 123, 00-001 Warszawa, Polska · KRS 0000123456 · NIP 111-222-33-44 · REGON 012345678
+        </p>
+      </div>
+      <div class="foot-cols">
+        <div>
+          <h5>Nawigacja</h5>
+          <ul>
+            <li><a href="index.html">Strona główna</a></li>
+            <li><a href="o-nas.html">O nas</a></li>
+            <li><a href="kontakt.html">Kontakt</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5>Kontakt</h5>
+          <ul>
+            <li>+48 600 123 456</li>
+            <li>pawel.testowy@engineware.pl</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <p class="legal">To jest fikcyjna witryna demonstracyjna wykorzystywana wyłącznie na potrzeby prezentacji systemu CRM. Engineware Demo Sp. z o.o. nie jest rzeczywistym podmiotem gospodarczym.</p>
+    <p class="quip">Wysłano dumnie z laboratorium demo Engineware. Prosimy nie drukować tej strony, chyba że nalega na to Wasza mysz.</p>
+  </div>
+</footer>
+
+</body>
+</html>
