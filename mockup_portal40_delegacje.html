@@ -122,7 +122,9 @@
   input[type="datetime-local"].in{color-scheme:dark;}
   .field.readonly-field .in{color:var(--text-dim);}
   .field .hint{font-size:10.5px;color:var(--text-faint);margin-top:5px;}
-  .field.hidden-field{display:none;}
+
+  /* FIX: reguła ogólna zamiast wymagającej klasy .field — działa też na <span> (np. gwiazdka wymagalności) */
+  .hidden-field{display:none;}
 
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 30px;}
   .span2{grid-column:1 / -1;}
@@ -355,8 +357,8 @@
           <!-- koszty dodatkowe: widoczne dla wszystkich poza "nie wybrano" -->
           <div class="field span2 hidden-field" id="koszty-field">
             <label>Koszty dodatkowe <span class="opt" id="koszty-opt">(opcjonalnie)</span></label>
-            <input class="in" id="koszty" type="number" min="0" step="0.01" placeholder="np. hotel, parking, bilet — kwota w zł" oninput="onKosztyChange()">
-            <div class="hint">Uzupełnienie tego pola wymaga potwierdzenia załącznikiem</div>
+            <input class="in" id="koszty" type="text" placeholder="np. bilet PKP 45 zł, parking 20 zł" oninput="onKosztyChange()">
+            <div class="hint">Opis poniesionych kosztów — kwotę wylicza administracja na podstawie opisu i załączników. Uzupełnienie wymaga potwierdzenia załącznikiem</div>
           </div>
 
           <div class="field span2 hidden-field" id="zalaczniki-field">
@@ -381,10 +383,10 @@
                 <div class="hint">Dodaje lub odejmuje od kwoty wyliczonej automatycznie — wymaga komentarza</div>
               </div>
 
-              <div class="field readonly-field">
+              <div class="field">
                 <label>Kwota końcowa</label>
-                <input class="in" id="kwotaKoncowa" value="—">
-                <div class="hint">Widoczna dla zgłaszającego po zwrocie wniosku</div>
+                <input class="in" id="kwotaKoncowa" placeholder="np. 178.00">
+                <div class="hint" id="kwotaKoncowaHint">Widoczna dla zgłaszającego po zwrocie wniosku</div>
               </div>
 
               <div class="field span2 hidden-field" id="komentarz-field">
@@ -418,9 +420,7 @@
 
     const isPrivateCar = t === 'prywatny';
     const needsOpis = t === 'mieszany' || t === 'inny';
-    const nothingSelected = false; // select zawsze ma wartość
 
-    // sekcja "Rozliczenie" jako całość
     el('rozliczenie-header').style.display = '';
 
     show('naped-field', isPrivateCar);
@@ -431,7 +431,6 @@
     show('koszty-field', true);
     show('zalaczniki-field', true);
 
-    // korekta administracji widoczna tylko przy samochodzie prywatnym (wg spec) — ukryta, nie zablokowana
     show('korekta-field', isPrivateCar);
     if(!isPrivateCar){ el('korekta').value=''; }
     onKorektaChange();
@@ -460,8 +459,8 @@
   }
 
   function onKosztyChange(){
-    const koszty = parseFloat(el('koszty').value) || 0;
-    const wymagane = koszty > 0;
+    const koszty = el('koszty').value.trim();
+    const wymagane = koszty.length > 0;
     el('zal-req').classList.toggle('hidden-field', !wymagane);
     el('koszty-opt').textContent = wymagane ? '(wymaga załącznika)' : '(opcjonalnie)';
     el('dropzone').classList.toggle('required-flag', wymagane && files.length === 0);
@@ -482,13 +481,15 @@
     const poj = parseFloat(el('poj').value) || 0;
     const stawka = poj > 900 ? 1.15 : 0.89;
     const auto = t === 'prywatny' ? km * stawka : 0;
-    const koszty = parseFloat(el('koszty').value) || 0;
+    // "Koszty dodatkowe" to pole tekstowe (opis, nie kwota) — administracja wylicza je ręcznie na podstawie opisu i załączników, nie sumuje się automatycznie
     const korekta = t === 'prywatny' ? (parseFloat(el('korekta').value) || 0) : 0;
-    const total = auto + koszty + korekta;
-    el('kwotaKoncowa').value = total !== 0 ? total.toFixed(2) + ' zł' : '—';
+    const total = auto + korekta;
+    // Kwota końcowa jest edytowalna przez administrację — tu tylko podpowiadamy sugerowaną wartość, nie nadpisujemy tego co admin wpisał
+    el('kwotaKoncowaHint').textContent = total !== 0
+      ? `Sugerowana na podstawie wyliczenia: ${total.toFixed(2)} zł — widoczna dla zgłaszającego po zwrocie wniosku`
+      : 'Widoczna dla zgłaszającego po zwrocie wniosku';
   }
 
-  // Attachments
   const dropzone = el('dropzone');
   const fileInput = el('fileInput');
   const chips = el('chips');
