@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Wniosek delegacyjny — Portal 40</title>
+<style>
+  :root{
+    --bg: #1e1e1e;
+    --panel: #2b2b2b;
+    --panel-edge: #3a3a3a;
+    --sidebar: #202020;
+    --topbar: #2ea3d6;
+    --text: #f2f2f2;
+    --text-dim: #b7b7b7;
+    --text-faint: #8a8a8a;
+    --required: #6fc3ea;
+    --line: #565656;
+    --line-soft: #3a3a3a;
+    --accent: #2ea3d6;
+    --avatar: #2f9e8f;
+    --danger: #e05a4e;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family: "Segoe UI", "Segoe UI Web", Arial, sans-serif;
+    font-size:14px;
+  }
+  .topbar{
+    background:var(--topbar);
+    color:#fff;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 16px;height:40px;font-size:13px;
+  }
+  .crumbs{display:flex;align-items:center;gap:6px;}
+  .crumbs span.sep{opacity:.6;}
+  .crumbs span.crumb.active{font-weight:600;}
+  .user{display:flex;align-items:center;gap:8px;}
+  .avatar{
+    width:26px;height:26px;border-radius:50%;
+    background:var(--avatar);
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:600;color:#fff;
+  }
+  .user .who{line-height:1.2;text-align:left;}
+  .user .who .name{font-size:12px;}
+  .user .who .mail{font-size:10px;opacity:.85;}
+
+  .cmdbar{
+    display:flex;align-items:center;gap:22px;
+    padding:8px 16px;
+    border-bottom:1px solid var(--line-soft);
+    font-size:12.5px;color:var(--text-dim);
+  }
+  .cmdbar .cmd{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;}
+  .cmdbar .cmd:hover{color:#fff;}
+
+  .toast{
+    position:fixed;top:50px;right:20px;
+    background:#2f9e8f;color:#fff;
+    padding:9px 16px;border-radius:3px;font-size:12.5px;
+    box-shadow:0 4px 14px rgba(0,0,0,.35);
+    opacity:0;transform:translateY(-6px);pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease;z-index:50;
+  }
+  .toast.show{opacity:1;transform:translateY(0);}
+
+  .layout{display:flex;min-height:calc(100vh - 40px - 37px);}
+  .sidebar{
+    width:210px;background:var(--sidebar);
+    border-right:1px solid var(--line-soft);
+    padding:14px 0;flex-shrink:0;
+  }
+  .side-item{
+    display:flex;align-items:center;gap:10px;
+    padding:9px 18px;color:var(--text-dim);font-size:13px;
+    cursor:default;border-left:3px solid transparent;
+  }
+  .side-item .ic{width:16px;text-align:center;opacity:.9;font-size:13px;}
+  .side-item.active{background:#333333;color:#fff;border-left:3px solid var(--accent);}
+  .side-foot{margin-top:40px;padding-top:10px;border-top:1px solid var(--line-soft);}
+
+  .content{flex:1;padding:26px 30px;}
+  .tabs{display:flex;gap:26px;border-bottom:1px solid var(--line-soft);margin-bottom:22px;}
+  .tab{padding-bottom:10px;font-size:13px;color:var(--text-dim);cursor:default;}
+  .tab.active{color:#fff;border-bottom:2px solid var(--accent);}
+
+  .panel{
+    background:var(--panel);border:1px solid var(--panel-edge);
+    max-width:800px;padding:22px 26px 28px;
+  }
+  .panel-title{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;margin-bottom:20px;}
+
+  .field{margin-bottom:22px;}
+  .field label{
+    display:flex;align-items:center;gap:5px;font-size:11.5px;
+    color:var(--text-dim);margin-bottom:6px;letter-spacing:.01em;
+  }
+  .field label .req{color:var(--required);font-size:13px;line-height:1;}
+  .field label .opt{color:var(--text-faint);font-weight:400;font-size:10.5px;text-transform:none;letter-spacing:0;}
+
+  .in{
+    width:100%;background:transparent;border:none;
+    border-bottom:1px solid var(--line);color:var(--text);
+    font-size:14px;font-family:inherit;padding:2px 0 7px;outline:none;
+    transition:border-color .15s ease;
+  }
+  .in::placeholder{color:var(--text-faint);}
+  .in:hover{border-bottom-color:#787878;}
+  .in:focus{border-bottom-color:var(--accent);}
+  select.in{
+    appearance:none;-webkit-appearance:none;cursor:pointer;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0 L5 6 L10 0 Z' fill='%238a8a8a'/></svg>");
+    background-repeat:no-repeat;background-position:right 2px center;padding-right:16px;
+  }
+  select.in option{background:#2b2b2b;color:var(--text);}
+  .in:disabled{color:var(--text-faint);border-bottom-style:dotted;cursor:not-allowed;}
+  textarea.in{resize:vertical;min-height:44px;font-family:inherit;line-height:1.4;padding-top:4px;}
+
+  input[type="datetime-local"].in{color-scheme:dark;}
+  .field.readonly-field .in{color:var(--text-dim);}
+  .field .hint{font-size:10.5px;color:var(--text-faint);margin-top:5px;}
+  .field.hidden-field{display:none;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 30px;}
+  .span2{grid-column:1 / -1;}
+
+  .section-break{
+    grid-column:1 / -1;font-size:11px;text-transform:uppercase;
+    letter-spacing:.06em;color:var(--text-dim);
+    border-top:1px solid var(--line-soft);padding-top:16px;
+    margin-top:2px;margin-bottom:16px;font-weight:600;
+  }
+  .section-break:first-child{border-top:none;padding-top:0;margin-top:0;}
+  .section-break.dyn{display:none;}
+
+  .status-pill{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:4px 10px 4px 8px;border:1px solid var(--accent);
+    border-radius:2px;font-size:11.5px;color:var(--accent);width:fit-content;
+  }
+  .status-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);}
+
+  .kwota-box{
+    display:flex;align-items:center;justify-content:space-between;
+    padding-bottom:7px;border-bottom:1px solid var(--line);
+  }
+  .kwota-val{font-size:18px;font-weight:600;color:#fff;transition:color .2s;}
+  .kwota-tag{font-size:10px;color:var(--text-faint);border:1px solid var(--line);border-radius:2px;padding:2px 7px;}
+
+  .dropzone{
+    border:1px dashed var(--line);padding:16px;font-size:12px;color:var(--text-dim);
+    display:flex;align-items:center;gap:12px;cursor:pointer;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .dropzone.drag{border-color:var(--accent);background:rgba(46,163,214,.06);}
+  .dropzone.required-flag{border-color:var(--required);}
+  .dropzone .ic{font-size:18px;}
+  .dropzone .txt b{color:var(--text);}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;}
+  .chip{
+    display:inline-flex;align-items:center;gap:7px;background:#333;
+    border:1px solid var(--line);border-radius:3px;padding:4px 6px 4px 9px;
+    font-size:11.5px;color:var(--text-dim);
+  }
+  .chip .x{
+    cursor:pointer;color:var(--text-faint);width:15px;height:15px;
+    border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;
+  }
+  .chip .x:hover{background:var(--danger);color:#fff;}
+
+  .admin-box{
+    grid-column:1 / -1;
+    border:1px solid #4a4630;
+    background:rgba(215,178,60,.06);
+    padding:14px 16px 4px;
+    margin-bottom:6px;
+  }
+  .admin-box .admin-label{
+    font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;
+    color:#d7b23c;font-weight:600;margin-bottom:12px;
+  }
+
+  .note{max-width:800px;margin-top:14px;font-size:11.5px;color:var(--text-faint);line-height:1.5;}
+  .note b{color:var(--text-dim);}
+</style>
+</head>
+<body>
+
+  <div class="toast" id="toast">Zapisano</div>
+
+  <div class="topbar">
+    <div class="crumbs">
+      <span>⌂</span>
+      <span class="sep">›</span>
+      <span class="crumb">Moje wnioski</span>
+      <span class="sep">›</span>
+      <span class="crumb">Szczegóły</span>
+      <span class="sep">›</span>
+      <span class="crumb active">Wniosek delegacyjny ⌄</span>
+    </div>
+    <div class="user">
+      <div class="who">
+        <div class="name">Bartek Wiśniewski</div>
+        <div class="mail">bwisniewski@arpideas.pl</div>
+      </div>
+      <div class="avatar">BW</div>
+    </div>
+  </div>
+
+  <div class="cmdbar">
+    <div class="cmd" onclick="showToast('Zapisano')"><span class="ic">💾</span> Zapisz</div>
+    <div class="cmd" onclick="showToast('Zapisano i zamknięto')"><span class="ic">💾</span> Zapisz i zamknij</div>
+    <div class="cmd" onclick="showToast('Utworzono nowy wniosek')"><span class="ic">＋</span> Zapisz i nowy</div>
+    <div class="cmd"><span class="ic">✕</span> Zamknij</div>
+  </div>
+
+  <div class="layout">
+    <div class="sidebar">
+      <div class="side-item"><span class="ic">🕐</span> Ostatnie</div>
+      <div class="side-item"><span class="ic">🏠</span> Strona Startowa</div>
+      <div class="side-item"><span class="ic">🗓</span> Wnioski urlopowe</div>
+      <div class="side-item"><span class="ic">🛒</span> Wnioski zakupowe</div>
+      <div class="side-item"><span class="ic">🎓</span> Wnioski szkoleniowe</div>
+      <div class="side-item"><span class="ic">🛠</span> Wnioski o usprawnienie</div>
+      <div class="side-item active"><span class="ic">🧳</span> Wnioski delegacyjne</div>
+      <div class="side-item"><span class="ic">⚙</span> Ustawienia</div>
+      <div class="side-foot">
+        <div class="side-item"><span class="ic">🩺</span> Self-care</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="tabs">
+        <div class="tab active">Wniosek delegacyjny</div>
+        <div class="tab">Informacje o rekordzie</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title"><span class="ic">🧳</span> Szczegóły</div>
+
+        <div class="grid2">
+
+          <div class="section-break">Podstawowe dane</div>
+
+          <div class="field readonly-field">
+            <label>Zgłaszający</label>
+            <input class="in" value="Bartek Wiśniewski" disabled>
+          </div>
+
+          <div class="field readonly-field">
+            <label>Status</label>
+            <div style="padding:2px 0 7px;">
+              <span class="status-pill"><span class="dot"></span>Zgłoszony</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Forma współpracy <span class="req">*</span></label>
+            <select class="in" id="forma">
+              <option>B2B</option>
+              <option>Umowa o pracę</option>
+              <option>Umowa zlecenie</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Klient / miejsce <span class="req">*</span></label>
+            <input class="in" placeholder="np. Drivelo Sp. z o.o. — Poznań" value="Drivelo Sp. z o.o. — Poznań">
+          </div>
+
+          <div class="field span2">
+            <label>Cel wyjazdu <span class="req">*</span></label>
+            <input class="in" placeholder="Krótki opis celu wyjazdu" value="Warsztat wdrożeniowy CRM — konfiguracja cennika">
+          </div>
+
+          <div class="section-break">Terminy</div>
+
+          <div class="field">
+            <label>Data i godzina wyjazdu <span class="req">*</span></label>
+            <input class="in" type="datetime-local" value="2026-08-18T06:30">
+          </div>
+
+          <div class="field">
+            <label>Data i godzina dotarcia <span class="req">*</span></label>
+            <input class="in" type="datetime-local" value="2026-08-18T09:00">
+          </div>
+
+          <div class="field">
+            <label>Data i godzina wyjazdu od klienta</label>
+            <input class="in" type="datetime-local">
+          </div>
+
+          <div class="field">
+            <label>Data i godzina powrotu</label>
+            <input class="in" type="datetime-local">
+          </div>
+
+          <div class="section-break">Transport</div>
+
+          <div class="field span2">
+            <label>Środek transportu <span class="req">*</span></label>
+            <select class="in" id="transport" onchange="onTransportChange()">
+              <option value="prywatny">Samochód prywatny</option>
+              <option value="firmowy">Samochód firmowy</option>
+              <option value="pociag">Pociąg</option>
+              <option value="samolot">Samolot</option>
+              <option value="publiczna">Komunikacja publiczna</option>
+              <option value="mieszany">Mieszany</option>
+              <option value="inny">Inny</option>
+            </select>
+          </div>
+
+          <!-- pola tylko dla: samochód prywatny -->
+          <div class="field" id="naped-field">
+            <label>Rodzaj napędu <span class="req">*</span></label>
+            <select class="in" id="naped">
+              <option>Spalinowy</option>
+              <option>Hybrydowy</option>
+              <option>Elektryczny</option>
+            </select>
+            <div class="hint">Dziś nie wpływa na wyliczenie — pole gotowe pod zmianę rozporządzenia</div>
+          </div>
+
+          <div class="field" id="km-field">
+            <label>Liczba kilometrów <span class="req">*</span></label>
+            <input class="in" id="km" type="number" min="0" placeholder="np. 210" oninput="calcKwota()">
+          </div>
+
+          <div class="field" id="poj-field">
+            <label>Pojemność silnika (cm³) <span class="req">*</span></label>
+            <input class="in" id="poj" type="number" min="0" placeholder="np. 1598" value="1598" oninput="calcKwota()">
+            <div class="hint">Determinuje stawkę za km</div>
+          </div>
+
+          <!-- pole tylko dla: mieszany / inny -->
+          <div class="field span2 hidden-field" id="opis-field">
+            <label>Opis transportu <span class="req">*</span></label>
+            <textarea class="in" id="opis" rows="2" placeholder="Opisz przebieg transportu, np. pociąg w jedną stronę, powrót samochodem z innym pracownikiem"></textarea>
+          </div>
+
+          <div class="section-break dyn" id="rozliczenie-header">Rozliczenie</div>
+
+          <!-- kwota wyliczona automatycznie: tylko dla samochodu prywatnego -->
+          <div class="field readonly-field span2 hidden-field" id="kwota-auto-field">
+            <label>Kwota wyliczona automatycznie</label>
+            <div class="kwota-box">
+              <span class="kwota-val" id="kwotaVal">— zł</span>
+              <span class="kwota-tag" id="kwotaTag">wg stawki 0,89 zł/km (poj. ≤ 900 cm³)</span>
+            </div>
+          </div>
+
+          <!-- koszty dodatkowe: widoczne dla wszystkich poza "nie wybrano" -->
+          <div class="field span2 hidden-field" id="koszty-field">
+            <label>Koszty dodatkowe <span class="opt" id="koszty-opt">(opcjonalnie)</span></label>
+            <input class="in" id="koszty" type="number" min="0" step="0.01" placeholder="np. hotel, parking, bilet — kwota w zł" oninput="onKosztyChange()">
+            <div class="hint">Uzupełnienie tego pola wymaga potwierdzenia załącznikiem</div>
+          </div>
+
+          <div class="field span2 hidden-field" id="zalaczniki-field">
+            <label>Załączniki <span class="req hidden-field" id="zal-req">*</span></label>
+            <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+              <span class="ic">📎</span>
+              <div class="txt"><b>Kliknij</b>, aby dodać pliki, lub przeciągnij je tutaj</div>
+              <input type="file" id="fileInput" multiple style="display:none">
+            </div>
+            <div class="chips" id="chips"></div>
+            <div class="hint">Dowolny format — PDF, zdjęcie, skan</div>
+          </div>
+
+          <!-- widoczne tylko dla administracji po zwrocie wniosku -->
+          <div class="admin-box span2" id="admin-box">
+            <div class="admin-label">Widok administracji — wypełniane podczas weryfikacji</div>
+
+            <div class="grid2">
+              <div class="field" id="korekta-field">
+                <label>Korekta administracji <span class="opt">(jeśli dotyczy — może być ujemna)</span></label>
+                <input class="in" id="korekta" type="number" step="0.01" placeholder="np. 100.00 lub -50.00" oninput="onKorektaChange()">
+                <div class="hint">Dodaje lub odejmuje od kwoty wyliczonej automatycznie — wymaga komentarza</div>
+              </div>
+
+              <div class="field readonly-field">
+                <label>Kwota końcowa</label>
+                <input class="in" id="kwotaKoncowa" value="—" disabled>
+                <div class="hint">Widoczna dla zgłaszającego po zwrocie wniosku</div>
+              </div>
+
+              <div class="field span2 hidden-field" id="komentarz-field">
+                <label>Komentarz administracji <span class="req">*</span></label>
+                <textarea class="in" id="komentarz" rows="2" placeholder="Uzasadnienie korekty lub powód zwrotu wniosku do poprawy"></textarea>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="note">
+        <b>Mockup koncepcyjny — pola działają lokalnie</b> (bez zapisu na serwer). Logika zmienia się w zależności od środka transportu: samochód prywatny pokazuje km/pojemność/rodzaj napędu i liczy kwotę automatycznie; samochód firmowy, pociąg, samolot i komunikacja publiczna pokazują tylko koszty dodatkowe + załączniki; mieszany i inny dodatkowo wymagają opisu transportu. Uzupełnienie „Kosztów dodatkowych” włącza wymóg załącznika. Sekcja administracji (korekta, kwota końcowa, komentarz) to osobny widok — pokazany tu na dole dla poglądu, docelowo widoczny tylko dla administracji / po zwrocie wniosku.
+      </div>
+    </div>
+  </div>
+
+<script>
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(()=>t.classList.remove('show'), 1800);
+  }
+
+  const el = id => document.getElementById(id);
+
+  function show(id, on){ el(id).classList.toggle('hidden-field', !on); }
+
+  function onTransportChange(){
+    const t = el('transport').value;
+
+    const isPrivateCar = t === 'prywatny';
+    const needsOpis = t === 'mieszany' || t === 'inny';
+    const nothingSelected = false; // select zawsze ma wartość
+
+    // sekcja "Rozliczenie" jako całość
+    el('rozliczenie-header').style.display = '';
+
+    show('naped-field', isPrivateCar);
+    show('km-field', isPrivateCar);
+    show('poj-field', isPrivateCar);
+    show('opis-field', needsOpis);
+    show('kwota-auto-field', isPrivateCar);
+    show('koszty-field', true);
+    show('zalaczniki-field', true);
+
+    // korekta administracji widoczna tylko przy samochodzie prywatnym (wg spec) — ukryta, nie zablokowana
+    show('korekta-field', isPrivateCar);
+    if(!isPrivateCar){ el('korekta').value=''; }
+    onKorektaChange();
+
+    calcKwota();
+    onKosztyChange();
+  }
+
+  function calcKwota(){
+    const t = el('transport').value;
+    const val = el('kwotaVal');
+    const tag = el('kwotaTag');
+    if(t !== 'prywatny'){
+      val.textContent = '— zł';
+      tag.textContent = 'nie dotyczy tego środka transportu';
+      updateKwotaKoncowa();
+      return;
+    }
+    const km = parseFloat(el('km').value) || 0;
+    const poj = parseFloat(el('poj').value) || 0;
+    const stawka = poj > 900 ? 1.15 : 0.89;
+    const kwota = km * stawka;
+    val.textContent = (km > 0 ? kwota.toFixed(2) : '—') + ' zł';
+    tag.textContent = `wg stawki ${stawka.toFixed(2)} zł/km (poj. ${poj>900 ? '> 900' : '≤ 900'} cm³)`;
+    updateKwotaKoncowa();
+  }
+
+  function onKosztyChange(){
+    const koszty = parseFloat(el('koszty').value) || 0;
+    const wymagane = koszty > 0;
+    el('zal-req').classList.toggle('hidden-field', !wymagane);
+    el('koszty-opt').textContent = wymagane ? '(wymaga załącznika)' : '(opcjonalnie)';
+    el('dropzone').classList.toggle('required-flag', wymagane && files.length === 0);
+    updateKwotaKoncowa();
+  }
+
+  function onKorektaChange(){
+    const t = el('transport').value;
+    const korekta = el('korekta').value;
+    const active = t === 'prywatny' && korekta !== '';
+    show('komentarz-field', active);
+    updateKwotaKoncowa();
+  }
+
+  function updateKwotaKoncowa(){
+    const t = el('transport').value;
+    const km = parseFloat(el('km').value) || 0;
+    const poj = parseFloat(el('poj').value) || 0;
+    const stawka = poj > 900 ? 1.15 : 0.89;
+    const auto = t === 'prywatny' ? km * stawka : 0;
+    const koszty = parseFloat(el('koszty').value) || 0;
+    const korekta = t === 'prywatny' ? (parseFloat(el('korekta').value) || 0) : 0;
+    const total = auto + koszty + korekta;
+    el('kwotaKoncowa').value = total !== 0 ? total.toFixed(2) + ' zł' : '—';
+  }
+
+  // Attachments
+  const dropzone = el('dropzone');
+  const fileInput = el('fileInput');
+  const chips = el('chips');
+  let files = [{name:'paliwo_18-08.jpg', size:'214 KB'}];
+
+  function renderChips(){
+    chips.innerHTML = '';
+    files.forEach((f, i) => {
+      const chip = document.createElement('div');
+      chip.className = 'chip';
+      chip.innerHTML = `📄 ${f.name} <span style="color:var(--text-faint)">(${f.size})</span> <span class="x" data-i="${i}">✕</span>`;
+      chip.querySelector('.x').onclick = (e) => {
+        e.stopPropagation();
+        files.splice(i,1);
+        renderChips();
+        onKosztyChange();
+        showToast('Usunięto załącznik');
+      };
+      chips.appendChild(chip);
+    });
+    onKosztyChange();
+  }
+
+  function addFiles(fileList){
+    Array.from(fileList).forEach(f => {
+      files.push({name:f.name, size: Math.round(f.size/1024) + ' KB'});
+    });
+    renderChips();
+    if(fileList.length) showToast(fileList.length > 1 ? 'Dodano załączniki' : 'Dodano załącznik');
+  }
+
+  fileInput.addEventListener('change', e => addFiles(e.target.files));
+  ['dragenter','dragover'].forEach(evt=>{
+    dropzone.addEventListener(evt, e=>{ e.preventDefault(); e.stopPropagation(); dropzone.classList.add('drag'); });
+  });
+  ['dragleave','drop'].forEach(evt=>{
+    dropzone.addEventListener(evt, e=>{ e.preventDefault(); e.stopPropagation(); dropzone.classList.remove('drag'); });
+  });
+  dropzone.addEventListener('drop', e=>{ if(e.dataTransfer.files.length) addFiles(e.dataTransfer.files); });
+
+  renderChips();
+  onTransportChange();
+</script>
+
+</body>
+</html>
